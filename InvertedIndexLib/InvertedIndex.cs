@@ -1,4 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace InvertedIndexLib
 {
@@ -9,7 +12,26 @@ namespace InvertedIndexLib
         {
             _data = data;
         }
-
+        public InvertedIndex()
+        {
+            _data = new ConcurrentDictionary<string, HashSet<string>>();
+        }
+        public static InvertedIndex Load(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                var f = new BinaryFormatter();
+                return new InvertedIndex((ConcurrentDictionary<string, HashSet<string>>)f.Deserialize(stream));
+            }
+        }
+        public void Save(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                var f = new BinaryFormatter();
+                f.Serialize(stream, _data);
+            }
+        }
         public void AddDoc(string docPath)
         {
             if (!File.Exists(docPath))
