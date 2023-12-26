@@ -14,7 +14,7 @@ namespace InvertedIndexLib
         {
             _data = new ConcurrentDictionary<string, HashSet<string>>();
         }
-        public static InvertedIndex Load(string path)
+        public static InvertedIndex LoadIndex(string path)
         {
             using (var stream = new FileStream(path, FileMode.Open))
             {
@@ -22,7 +22,7 @@ namespace InvertedIndexLib
                 return new InvertedIndex((ConcurrentDictionary<string, HashSet<string>>)f.Deserialize(stream));
             }
         }
-        public void Save(string path)
+        public void SaveIndex(string path)
         {
             using (var stream = new FileStream(path, FileMode.Create))
             {
