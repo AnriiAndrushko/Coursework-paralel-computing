@@ -49,7 +49,7 @@ namespace InvertedIndexLib
             Task curTask;
             while (!_cts.Token.IsCancellationRequested)
             {
-                if (!_taskQueue.IsEmpty)//TODO: maybe use monitor here
+                if (!_taskQueue.IsEmpty)//TODO: maybe use semafor here
                 {
                     if (_taskQueue.TryDequeue(out curTask))
                     {
