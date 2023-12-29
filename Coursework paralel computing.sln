@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "Coursework parale
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormsClient", "WinFormsClient\WinFormsClient.csproj", "{34A847AE-CB79-4DED-9B64-920CE4426EC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvertedIndexLib", "InvertedIndexLib\InvertedIndexLib.csproj", "{3982EE6D-97EB-4A7E-BDA1-234B6DAACA68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvertedIndexLib", "InvertedIndexLib\InvertedIndexLib.csproj", "{3982EE6D-97EB-4A7E-BDA1-234B6DAACA68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{3E574C08-1C88-4F56-9BA6-B86FBE14EE24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{3982EE6D-97EB-4A7E-BDA1-234B6DAACA68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3982EE6D-97EB-4A7E-BDA1-234B6DAACA68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3982EE6D-97EB-4A7E-BDA1-234B6DAACA68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E574C08-1C88-4F56-9BA6-B86FBE14EE24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E574C08-1C88-4F56-9BA6-B86FBE14EE24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E574C08-1C88-4F56-9BA6-B86FBE14EE24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E574C08-1C88-4F56-9BA6-B86FBE14EE24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

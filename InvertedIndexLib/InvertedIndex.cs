@@ -1,6 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.Serialization.Formatters.Binary;
 
+
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+
+[assembly: InternalsVisibleTo("Tests")]
+
 namespace InvertedIndexLib
 {
     internal class InvertedIndex
@@ -33,6 +39,9 @@ namespace InvertedIndexLib
 
         public void AddText(string text, string textOrigin)
         {
+            string pattern = @"[\p{P}-[']]+";
+            text = Regex.Replace(text.ToLower(), pattern, " ");
+            text.Trim();
             foreach (string word in text.Split())
             {
                 if (!_data.ContainsKey(word))
