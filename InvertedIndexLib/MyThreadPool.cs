@@ -7,11 +7,16 @@ namespace InvertedIndexLib
         Thread[] _pool;
         ConcurrentQueue<Task> _taskQueue;
         CancellationTokenSource _cts;
+        int _busyCounter;
+        object _busyCounterLock;
         private readonly int _size;
+        public bool IsBusy { get { lock (_busyCounterLock) { return _busyCounter != 0; } } }
         public int Size => _size;
 
         public MyThreadPool(ConcurrentQueue<Task> taskQueue, int size = 6)
         {
+            _busyCounterLock = new object();
+            _busyCounter = 0;
             _size = size;
             _cts = new CancellationTokenSource();
             _taskQueue = taskQueue;
@@ -44,12 +49,20 @@ namespace InvertedIndexLib
             Task curTask;
             while (!_cts.Token.IsCancellationRequested)
             {
-
-                if (!_taskQueue.IsEmpty)
+                if (!_taskQueue.IsEmpty)//TODO: maybe use monitor here
                 {
-                    while (!_taskQueue.TryDequeue(out curTask)) { }; //TODO: maybe use monitor here
-                    curTask.RunSynchronously();
-                    continue;
+                    if (_taskQueue.TryDequeue(out curTask))
+                    {
+                        lock (_busyCounterLock)
+                        {
+                            _busyCounter++;
+                        }
+                        curTask.RunSynchronously();
+                        lock (_busyCounterLock)
+                        {
+                            _busyCounter--;
+                        }
+                    }
                 }
             }
         }

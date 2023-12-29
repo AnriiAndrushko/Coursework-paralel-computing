@@ -30,6 +30,22 @@ namespace InvertedIndexLib
                 f.Serialize(stream, _data);
             }
         }
+
+        public void AddText(string text, string textOrigin)
+        {
+            foreach (string word in text.Split())
+            {
+                if (!_data.ContainsKey(word))
+                {
+                    _data.TryAdd(word, new HashSet<string>());
+                }
+                lock (_data[word])
+                {
+                    _data[word].Add(textOrigin);
+                }
+            }
+        }
+
         public void AddDoc(string docPath)
         {
             if (!File.Exists(docPath))
@@ -40,14 +56,7 @@ namespace InvertedIndexLib
             {
                 while (sr.Peek() >= 0)
                 {
-                    foreach (string word in sr.ReadLine().Split())
-                    {
-                        if (!_data.ContainsKey(word))
-                        {
-                            _data.TryAdd(word, new HashSet<string>());
-                        }
-                        _data[word].Add(docPath);
-                    }
+                    AddText(sr.ReadLine(), docPath);
                 }
             }
         }

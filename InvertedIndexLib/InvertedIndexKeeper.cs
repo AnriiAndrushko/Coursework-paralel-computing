@@ -2,11 +2,12 @@
 
 namespace InvertedIndexLib
 {
-    public class InvertedIndexKeeper
+    public class InvertedIndexKeeper:IDisposable
     {
         MyThreadPool _pool;
         ConcurrentQueue<Task> _queue;
         InvertedIndex _index;
+        public bool IsBusy => _pool.IsBusy;
 
         public InvertedIndexKeeper(int threadCount)
         {
@@ -30,21 +31,30 @@ namespace InvertedIndexLib
 
         public void AddDoc(string docPath)
         {
-            _queue.Append(new Task(() => _index.AddDoc(docPath)));
+            _queue.Enqueue(new Task(() => _index.AddDoc(docPath)));
+        }
+        public void AddText(string text, string textOrigin = "Debug")
+        {
+            _queue.Enqueue(new Task(() => _index.AddText(text, textOrigin)));
         }
 
         public IEnumerable<string> GetByWord(string word)
         {
             var tmp = new Task<IEnumerable<string>>(() => _index.GetByWord(word));
-            _queue.Append(tmp);
+            _queue.Enqueue(tmp);
             return tmp.Result;
         }
 
         public IEnumerable<string> GetByQuery(string sentence)
         {
             var tmp = new Task<IEnumerable<string>>(() => _index.GetByQuery(sentence));
-            _queue.Append(tmp);
+            _queue.Enqueue(tmp);
             return tmp.Result;
+        }
+
+        public void Dispose()
+        {
+            _pool.Stop();
         }
     }
 }
