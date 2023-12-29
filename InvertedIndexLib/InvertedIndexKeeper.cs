@@ -2,7 +2,7 @@
 
 namespace InvertedIndexLib
 {
-    internal class InvertedIndexKeeper
+    public class InvertedIndexKeeper
     {
         MyThreadPool _pool;
         ConcurrentQueue<Task> _queue;

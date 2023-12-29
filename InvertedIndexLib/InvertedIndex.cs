@@ -3,7 +3,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace InvertedIndexLib
 {
-    public class InvertedIndex
+    internal class InvertedIndex
     {
         private ConcurrentDictionary<string, HashSet<string>> _data;
         public InvertedIndex(ConcurrentDictionary<string, HashSet<string>> data)
