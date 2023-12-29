@@ -6,7 +6,7 @@ namespace Tests
     public class ThreadPoolTest
     {
         [TestMethod]
-        public void ThreadPool_QueueUserWorkItem_Success()
+        public void ThreadPool_CreatesNewThread()
         {
             int currentThreadId = Thread.CurrentThread.ManagedThreadId;
             int actualThreadId = -1;
