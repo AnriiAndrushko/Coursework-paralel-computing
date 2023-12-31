@@ -47,9 +47,9 @@ namespace InvertedIndexLib
             return tmp.Result;
         }
 
-        public IEnumerable<string> GetByQuery(string sentence)
+        public IEnumerable<string> GetByQuery(string query)
         {
-            var tmp = new Task<IEnumerable<string>>(() => _index.GetByQuery(sentence));
+            var tmp = new Task<IEnumerable<string>>(() => _index.GetByQuery(query));
             _queue.Enqueue(tmp);
             return tmp.Result;
         }

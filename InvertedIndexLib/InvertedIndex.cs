@@ -79,10 +79,10 @@ namespace InvertedIndexLib
             }
             return new string[0];
         }
-        public IEnumerable<string> GetByQuery(string sentence)
+        public IEnumerable<string> GetByQuery(string query)
         {
             List<IEnumerable<string>> files = new List<IEnumerable<string>>();
-            foreach (string word in sentence.Split())
+            foreach (string word in query.Split())
             {
                 files.Add(GetByWord(word));
             }

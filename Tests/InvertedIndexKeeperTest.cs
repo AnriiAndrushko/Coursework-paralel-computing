@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Tests
+﻿namespace Tests
 {
     [TestClass]
     public class InvertedIndexKeeperTest
