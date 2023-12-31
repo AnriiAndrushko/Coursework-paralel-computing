@@ -18,19 +18,18 @@ namespace InvertedIndexLib
             _busyCounterLock = new object();
             _busyCounter = 0;
             _size = size;
-            _cts = new CancellationTokenSource();
             _taskQueue = taskQueue;
             _pool = new Thread[size];
-            for (int i = 0; i < _pool.Length; i++)
-            {
-                _pool[i] = new Thread(new ThreadStart(worker));
-            }
         }
 
         public void Start()
         {
+            if (_cts != null) _cts.Dispose();
+            _cts = new CancellationTokenSource();
+
             for (int i = 0; i < _pool.Length; i++)
             {
+                _pool[i] = new Thread(new ThreadStart(worker));
                 _pool[i].Start();
             }
         }

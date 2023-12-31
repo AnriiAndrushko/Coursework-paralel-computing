@@ -19,7 +19,9 @@ namespace InvertedIndexLib
 
         public void Save(string path)
         {
+            _pool.Stop();
             _index.SaveIndex(path);
+            _pool.Start();
         }
 
         public void Load(string path)

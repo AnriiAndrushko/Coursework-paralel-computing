@@ -25,7 +25,8 @@ namespace InvertedIndexLib
             using (var stream = new FileStream(path, FileMode.Open))
             {
                 var f = new BinaryFormatter();
-                return new InvertedIndex((ConcurrentDictionary<string, HashSet<string>>)f.Deserialize(stream));
+                var deserializedDic = (Dictionary<string, HashSet<string>>)f.Deserialize(stream);
+                return new InvertedIndex(new ConcurrentDictionary<string, HashSet<string>>(deserializedDic));
             }
         }
         public void SaveIndex(string path)
@@ -33,7 +34,7 @@ namespace InvertedIndexLib
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 var f = new BinaryFormatter();
-                f.Serialize(stream, _data);
+                f.Serialize(stream, new Dictionary<string, HashSet<string>>(_data, _data.Comparer));
             }
         }
 
