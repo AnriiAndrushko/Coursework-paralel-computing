@@ -7,6 +7,8 @@
         public void Save_SavesIndexIntoFile()
         {
             string pathToSave = "testIndex";
+            if (File.Exists(pathToSave))
+                File.Delete(pathToSave);
             InvertedIndexKeeper index1 = new(2);
             index1.AddText("bla bla", "test");
             index1.Save(pathToSave);
