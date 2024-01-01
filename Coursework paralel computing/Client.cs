@@ -1,5 +1,4 @@
 ﻿using InvertedIndexLib;
-using System;
 using System.Net.Sockets;
 using System.Text;
 
@@ -38,11 +37,13 @@ namespace IndexServer
                         switch (parsedCommand)
                         {
                             case Command.Save:
+                                Result = new string[] { "Saved" };
                                 Console.WriteLine(command + " command was recieved");
                                 param = _received.Split(' ', 2)[1];
                                 _index.Save(param);
                                 break;
                             case Command.Load:
+                                Result = new string[] { "Loaded" };
                                 Console.WriteLine(command + " command was recieved");
                                 param = _received.Split(' ', 2)[1];
                                 _index.Load(param);
@@ -51,6 +52,7 @@ namespace IndexServer
                                 Console.WriteLine(command + " command was recieved");
                                 param = _received.Split(' ', 2)[1];
                                 _index.AddDoc(param);
+                                Result = new string[] { "Document " + param + " added" };
                                 break;
                             case Command.GetByWord:
                                 Console.WriteLine(command + " command was recieved");
@@ -68,6 +70,7 @@ namespace IndexServer
                                 break;
                             default:
                                 Console.WriteLine("Incorrect command was recieved");
+                                Result = null;
                                 CurStatus = Status.pendingCommand;
                                 break;
                         }

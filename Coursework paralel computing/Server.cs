@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using InvertedIndexLib;
+using System.IO;
 
 namespace IndexServer
 {
@@ -15,9 +16,9 @@ namespace IndexServer
         private readonly Socket _serverSocket;
         private readonly InvertedIndexKeeper _index;
 
-        public Server(string adress, int port, InvertedIndexKeeper index, int backlogCount = 3)
+        public Server(string adress, int port, int backlogCount = 6, int threadCount = 6)
         {
-            _index = index;
+            _index = new InvertedIndexKeeper(threadCount);
             _backlogCount = backlogCount;
             _clients = new ConcurrentDictionary<Client, Client>();
             _adress = adress;
@@ -71,26 +72,29 @@ namespace IndexServer
             {
                 case Status.pendingCommand:
                     curClient.CurStatus = Status.waitingResult;
-                    toSend = Encoding.ASCII.GetBytes("Started your command");
-                    curClient.Socket.Send(toSend);
-                    break;
-                case Status.waitingResult:
-                    Console.WriteLine("Attemp to get result");
+
                     var res = curClient.Result;
                     if (res == null)
                     {
                         toSend = Encoding.ASCII.GetBytes("No result for this command");
                     }
-                    else{
+                    else
+                    {
                         StringBuilder sb = new();
-                        foreach(var path in res)
+                        foreach (var path in res)
                         {
                             sb.Append(path).Append(' ');
                         }
-                        toSend = Encoding.ASCII.GetBytes($"Your result is:\n {sb}");
+                        if (res.Count() == 0)
+                        {
+                            sb.Append("Nothing found");
+                        }
+                        toSend = Encoding.ASCII.GetBytes(sb.ToString());
+
                     }
-                    
+
                     curClient.Socket.Send(toSend);
+                    curClient.CurStatus = Status.pendingCommand;
                     break;
             }
             curClient.Socket.BeginReceive(curClient.Buff, 0, curClient.BufferSize, SocketFlags.None, ReceiveCallback, curClient);
@@ -104,6 +108,7 @@ namespace IndexServer
             }
             _serverSocket.Close();
             Console.WriteLine("Server closed");
+            _index.Dispose();
         }
 
         public void Start()
