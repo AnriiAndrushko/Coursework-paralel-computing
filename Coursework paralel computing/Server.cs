@@ -3,7 +3,6 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using InvertedIndexLib;
-using System.IO;
 
 namespace IndexServer
 {
@@ -32,8 +31,15 @@ namespace IndexServer
 
         private void AcceptCallback(IAsyncResult AR)
         {
-            Socket socket;
-            socket = _serverSocket.EndAccept(AR);
+            Socket socket = null;
+            try
+            {
+                socket = _serverSocket.EndAccept(AR);
+            }
+            catch(ObjectDisposedException)
+            {
+                return;
+            }
             var client = new Client(socket, _index);
             do { } while (!_clients.TryAdd(client, client));
             socket.BeginReceive(client.Buff, 0, client.BufferSize, SocketFlags.None, ReceiveCallback, client);
@@ -45,16 +51,6 @@ namespace IndexServer
         {
             Client curClient = (Client)AR.AsyncState;
             int amountReceivedBytes;
-
-            if (curClient.CurStatus==Status.Disconnect)
-            {
-                curClient.Socket.Shutdown(SocketShutdown.Both);
-                curClient.Socket.Close();
-                do { } while (_clients.TryRemove(curClient, out curClient));
-                Console.WriteLine("Client disconnected");
-                return;
-            }
-
             try
             {
                 amountReceivedBytes = curClient.Socket.EndReceive(AR);
@@ -94,6 +90,14 @@ namespace IndexServer
                     }
 
                     curClient.Socket.Send(toSend);
+                    if (curClient.CurStatus == Status.Disconnect)
+                    {
+                        curClient.Socket.Shutdown(SocketShutdown.Both);
+                        curClient.Socket.Close();
+                        do { } while (_clients.TryRemove(curClient, out curClient));
+                        Console.WriteLine("Client disconnected");
+                        return;
+                    }
                     curClient.CurStatus = Status.pendingCommand;
                     break;
             }

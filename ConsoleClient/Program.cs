@@ -27,11 +27,11 @@ void ConnectToServer()
         }
         catch (SocketException)
         {
-            Console.Clear();
+            //Console.Clear();
         }
     }
 
-    Console.Clear();
+    //Console.Clear();
     Console.WriteLine("Connected");
 }
 
