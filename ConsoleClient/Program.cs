@@ -3,7 +3,6 @@ using System.Text;
 
 const string IPServer = "192.168.1.104";
 const int ServerPort = 25565;
-int sizeN = -1;
 
 Socket ClientSocket = new Socket
        (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

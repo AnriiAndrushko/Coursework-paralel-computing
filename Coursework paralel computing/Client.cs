@@ -37,13 +37,13 @@ namespace IndexServer
                         switch (parsedCommand)
                         {
                             case Command.Save:
-                                Result = new string[] { "Saved" };
+                                Result = null;
                                 Console.WriteLine(command + " command was recieved");
                                 param = _received.Split(' ', 2)[1];
                                 _index.Save(param);
                                 break;
                             case Command.Load:
-                                Result = new string[] { "Loaded" };
+                                Result = null;
                                 Console.WriteLine(command + " command was recieved");
                                 param = _received.Split(' ', 2)[1];
                                 _index.Load(param);
@@ -52,7 +52,7 @@ namespace IndexServer
                                 Console.WriteLine(command + " command was recieved");
                                 param = _received.Split(' ', 2)[1];
                                 _index.AddDoc(param);
-                                Result = new string[] { "Document " + param + " added" };
+                                Result = null;
                                 break;
                             case Command.GetByWord:
                                 Console.WriteLine(command + " command was recieved");
