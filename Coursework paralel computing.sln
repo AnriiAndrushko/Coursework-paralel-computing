@@ -9,9 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvertedIndexLib", "Inverte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{3E574C08-1C88-4F56-9BA6-B86FBE14EE24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "ConsoleClient\ConsoleClient.csproj", "{60C4C8E3-217D-469F-9026-1D70FD6BE487}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientTestPool", "ClientTestPool\ClientTestPool.csproj", "{02AAD5B9-5C9A-41EB-B5CF-2B78E1D65237}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleClient", "ConsoleClient\ConsoleClient.csproj", "{60C4C8E3-217D-469F-9026-1D70FD6BE487}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +33,6 @@ Global
 		{60C4C8E3-217D-469F-9026-1D70FD6BE487}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60C4C8E3-217D-469F-9026-1D70FD6BE487}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60C4C8E3-217D-469F-9026-1D70FD6BE487}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02AAD5B9-5C9A-41EB-B5CF-2B78E1D65237}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02AAD5B9-5C9A-41EB-B5CF-2B78E1D65237}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02AAD5B9-5C9A-41EB-B5CF-2B78E1D65237}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02AAD5B9-5C9A-41EB-B5CF-2B78E1D65237}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
