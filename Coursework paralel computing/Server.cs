@@ -44,6 +44,15 @@ namespace IndexServer
             Client curClient = (Client)AR.AsyncState;
             int amountReceivedBytes;
 
+            if (curClient.CurStatus==Status.Disconnect)
+            {
+                curClient.Socket.Shutdown(SocketShutdown.Both);
+                curClient.Socket.Close();
+                do { } while (_clients.TryRemove(curClient, out curClient));
+                Console.WriteLine("Client disconnected");
+                return;
+            }
+
             try
             {
                 amountReceivedBytes = curClient.Socket.EndReceive(AR);
@@ -55,22 +64,12 @@ namespace IndexServer
                 do { } while (_clients.TryRemove(curClient, out curClient));
                 return;
             }
-            if (amountReceivedBytes == 1)
-            {
-                curClient.Socket.Shutdown(SocketShutdown.Both);
-                curClient.Socket.Close();
-                do { } while (_clients.TryRemove(curClient, out curClient));
-                Console.WriteLine("Client disconnected");
-                return;
-            }
-            byte[] recBuf = new byte[amountReceivedBytes];
-            Array.Copy(curClient.Buff, recBuf, amountReceivedBytes);
+            curClient.RecievedCount = amountReceivedBytes;
             byte[] toSend;
             switch (curClient.CurStatus)
             {
                 case Status.pendingCommand:
                     curClient.CurStatus = Status.waitingResult;
-                    Console.WriteLine("Starting calculation");
                     toSend = Encoding.ASCII.GetBytes("Started your command");
                     curClient.Socket.Send(toSend);
                     break;

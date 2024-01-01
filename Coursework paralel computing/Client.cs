@@ -10,6 +10,7 @@ namespace IndexServer
         string _received;
         private byte[] _buffer;
         InvertedIndexKeeper _index;
+        public int RecievedCount;
 
         public Socket Socket { get; set; }
         public Status CurStatus
@@ -19,18 +20,16 @@ namespace IndexServer
             {
                 switch (value)
                 {
-                    case Status.connectionEstablished:
-                        _curStatus = Status.connectionEstablished;
-                        _buffer = new byte[4096];
-                        break;
                     case Status.pendingCommand:
                         _curStatus = Status.pendingCommand;
-                        _received = Encoding.ASCII.GetString(_buffer);
+                        _buffer = new byte[4096];
                         break;
                     case Status.waitingResult:
+                        Array.Resize(ref _buffer, RecievedCount);
+                        _received = Encoding.ASCII.GetString(_buffer);
                         _curStatus = Status.waitingResult;
                         string command = _received.Split()[0];
-                        string param = _received.Split(' ', 2)[1];
+                        string param;
                         Command parsedCommand;
                         if (!Enum.TryParse(command, true, out parsedCommand))
                         {
@@ -39,24 +38,42 @@ namespace IndexServer
                         switch (parsedCommand)
                         {
                             case Command.Save:
+                                Console.WriteLine(command + " command was recieved");
+                                param = _received.Split(' ', 2)[1];
                                 _index.Save(param);
                                 break;
                             case Command.Load:
+                                Console.WriteLine(command + " command was recieved");
+                                param = _received.Split(' ', 2)[1];
                                 _index.Load(param);
                                 break;
                             case Command.AddDoc:
+                                Console.WriteLine(command + " command was recieved");
+                                param = _received.Split(' ', 2)[1];
                                 _index.AddDoc(param);
                                 break;
                             case Command.GetByWord:
+                                Console.WriteLine(command + " command was recieved");
+                                param = _received.Split(' ', 2)[1];
                                 Result = _index.GetByWord(param);
                                 break;
                             case Command.GetByQuery:
+                                Console.WriteLine(command + " command was recieved");
+                                param = _received.Split(' ', 2)[1];
                                 Result = _index.GetByQuery(param);
                                 break;
+                            case Command.Disconnect:
+                                Console.WriteLine(command + " command was recieved");
+                                CurStatus = Status.Disconnect;
+                                break;
                             default:
-                                throw new Exception("Unimplemented command");
+                                Console.WriteLine("Incorrect command was recieved");
+                                CurStatus = Status.pendingCommand;
                                 break;
                         }
+                        break;
+                    case Status.Disconnect:
+                        _curStatus = Status.Disconnect;
                         break;
                 }
             }
@@ -67,6 +84,10 @@ namespace IndexServer
             get
             {
                 return _buffer;
+            }
+            set
+            {
+                _buffer = value;
             }
         }
         public IEnumerable<string> Result;
@@ -81,9 +102,9 @@ namespace IndexServer
         {
             _index = index;
             Socket = socket;
-            CurStatus = Status.connectionEstablished;
+            CurStatus = Status.pendingCommand;
         }
     }
-    public enum Status { connectionEstablished, pendingCommand, waitingResult };
-    public enum Command { Save, Load, AddDoc, GetByWord, GetByQuery, Unknown};
+    public enum Status { pendingCommand, waitingResult, Disconnect };
+    public enum Command { Save, Load, AddDoc, GetByWord, GetByQuery, Disconnect, Unknown};
 }

@@ -4,7 +4,7 @@ using System.Text;
 const string IPServer = "192.168.1.104";
 const int ServerPort = 25565;
 int sizeN = -1;
-Status curStatus = Status.SendingSize;
+Status curStatus = Status.sendingCommand;
 
 Socket ClientSocket = new Socket
        (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -39,7 +39,7 @@ void ConnectToServer()
 
 void RequestLoop()
 {
-    Console.WriteLine(@"Type ""exit"" any time to disconnect from server");
+    Console.WriteLine(@"Type ""Disconnect"" any time to disconnect from server");
 
     while (true)
     {
@@ -50,7 +50,6 @@ void RequestLoop()
 
 void Exit()
 {
-    SendStop();
     ClientSocket.Shutdown(SocketShutdown.Both);
     ClientSocket.Close();
     Environment.Exit(0);
@@ -60,69 +59,60 @@ void SendRequest()
 {
     switch (curStatus)
     {
-        case Status.SendingSize:
-            Console.WriteLine("Send matrix size n");
-            break;
-
-        case Status.SendingArray:
-            Console.WriteLine($"Send array {sizeN}*{sizeN} = {sizeN * sizeN} int digits and {sizeN} digits of vector");
-            break;
-        case Status.GettingResult:
-            Console.WriteLine($"Write anything to request server for result");
+        case Status.sendingCommand:
+            Console.WriteLine("Send one of this command:\n" +
+                "Save path - save index to provided path\n" +
+                "Load path - load index from provided path\n" +
+                "AddDoc path - adds doc from provided path\n" +
+                "GetByWord word - get all dock name from index by word\n" +
+                "GetByQuery query - get all dock name from index by query\n" +
+                "Disconnect - disconnect from server");
             break;
     }
 
-    string request = Console.ReadLine();
+    string input = Console.ReadLine();
 
-    if (request == "exit")
+    string command = input.Split()[0];
+    Command parsedCommand;
+    if (!Enum.TryParse(command, true, out parsedCommand))
     {
-        Exit();
-        return;
-    }
-    if (curStatus == Status.GettingResult)
+        parsedCommand = Command.Unknown;
+    };
+    switch (parsedCommand)
     {
-        SendInts(new int[] { 1 });
-        return;
-    }
-    int[] toSend = request.Split(" ").Select(x => Int32.Parse(x)).ToArray();
-
-
-    switch (curStatus)
-    {
-        case Status.SendingSize:
-            sizeN = toSend[0];
-            curStatus = Status.SendingArray;
+        case Command.Save:
             break;
-        case Status.SendingArray:
-            curStatus = Status.GettingResult;
+        case Command.Load:
             break;
+        case Command.AddDoc:
+            break;
+        case Command.GetByWord:
+            break;
+        case Command.GetByQuery:
+            break;
+        case Command.Disconnect:
+            SendCommand(command);
+            Exit();
+            return;
+        default:
+            Console.WriteLine("Incorrect command");
+            SendCommand(command);//this should not be here in real app, but i need to send incorrect command to test that server correctly handle it
+            return;
     }
 
-    SendInts(toSend);
+    SendCommand(command);
 }
 
 
-void SendInts(int[] data)
+void SendCommand(string data)
 {
-    byte[] buffer = new byte[data.Length * sizeof(int)];
-    int counter = 0;
-    foreach (int i in data)
-    {
-        byte[]? newDat = BitConverter.GetBytes(data[counter]);
-        Array.Copy(newDat, 0, buffer, counter * sizeof(int), newDat.Length);
-        counter++;
-    }
+    byte[] buffer = Encoding.ASCII.GetBytes(data); ;
     ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
-}
-
-void SendStop()
-{
-    ClientSocket.Send(new byte[1], 0, 1, SocketFlags.None);
 }
 
 void ReceiveResponse()
 {
-    var buffer = new byte[4096]; //to recive any message
+    var buffer = new byte[4096];
     int received = ClientSocket.Receive(buffer, SocketFlags.None);
     if (received == 0) return;
     var data = new byte[received];
@@ -131,4 +121,5 @@ void ReceiveResponse()
     Console.WriteLine(text);
 }
 
-public enum Status { connectionEstablished, sendingCommand, waitingResult };
+public enum Status { sendingCommand };
+public enum Command { Save, Load, AddDoc, GetByWord, GetByQuery, Disconnect, Unknown };
