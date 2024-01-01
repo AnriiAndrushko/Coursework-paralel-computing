@@ -1,11 +1,16 @@
-﻿using System.Net.Sockets;
+﻿using InvertedIndexLib;
+using System;
+using System.Net.Sockets;
+using System.Text;
 
 namespace IndexServer
 {
     internal class Client
     {
-        private int[,] _arr;
-        private int[] _vecor;
+        string _received;
+        private byte[] _buffer;
+        InvertedIndexKeeper _index;
+
         public Socket Socket { get; set; }
         public Status CurStatus
         {
@@ -14,115 +19,71 @@ namespace IndexServer
             {
                 switch (value)
                 {
-                    case Status.pendingArrData:
-                        _curStatus = Status.pendingArrData;
-                        n = BitConverter.ToInt32(_buffer, 0);
-                        _buffer = new byte[BufferSize];
-                        _arr = new int[n, n];
-                        _vecor = new int[n];
+                    case Status.connectionEstablished:
+                        _curStatus = Status.connectionEstablished;
+                        _buffer = new byte[4096];
                         break;
-                    case Status.pendingArrSize:
-                        _curStatus = Status.pendingArrSize;
-                        n = -1;
-                        _buffer = new byte[BufferSize];
+                    case Status.pendingCommand:
+                        _curStatus = Status.pendingCommand;
+                        _received = Encoding.ASCII.GetString(_buffer);
                         break;
-                    case Status.waitingForCalculatedAnswer:
-                        int x=0, y=0;
-                        int matLength = _buffer.Length * 2 / 3;
-                        for (int i = 0; i< matLength; i+= sizeof(int))
+                    case Status.waitingResult:
+                        _curStatus = Status.waitingResult;
+                        string command = _received.Split()[0];
+                        string param = _received.Split(' ', 2)[1];
+                        Command parsedCommand;
+                        if (!Enum.TryParse(command, true, out parsedCommand))
                         {
-                            _arr[y,x] = BitConverter.ToInt32(_buffer, i);
-                            x++;
-                            if (x>=n)
-                            {
-                                x = 0;
-                                y++;
-                            }
-                        }
-                        x = 0;
-                        for (int i = _buffer.Length * 2 / 3; i < _buffer.Length; i += sizeof(int))
+                            parsedCommand = Command.Unknown;
+                        };
+                        switch (parsedCommand)
                         {
-                            _vecor[x] = BitConverter.ToInt32(_buffer, i);
-                            x++;
+                            case Command.Save:
+                                _index.Save(param);
+                                break;
+                            case Command.Load:
+                                _index.Load(param);
+                                break;
+                            case Command.AddDoc:
+                                _index.AddDoc(param);
+                                break;
+                            case Command.GetByWord:
+                                Result = _index.GetByWord(param);
+                                break;
+                            case Command.GetByQuery:
+                                Result = _index.GetByQuery(param);
+                                break;
+                            default:
+                                throw new Exception("Unimplemented command");
+                                break;
                         }
-                        _curStatus = Status.waitingForCalculatedAnswer;
                         break;
                 }
             }
         }
         public Status _curStatus;
 
-        public int n;
         public byte[] Buff {
             get
             {
                 return _buffer;
             }
         }
-        private byte[] _buffer;
-
-        Task<int[,]> _task;
-        public int[,] Result
-        {
-            get
-            {
-                if (!_task.IsCompleted)
-                {
-                    return new int[0,0];
-                }
-                return _task.Result;
-            }
-        }
+        public IEnumerable<string> Result;
 
         public int BufferSize { get
             {
-                return CurStatus == Status.pendingArrSize ? 
-                    sizeof(int) * 1 : sizeof(int) * (n * n + n);
+                return _buffer.Length;
             }
         }
 
-        public Client(Socket socket)
+        public Client(Socket socket, InvertedIndexKeeper index)
         {
-            _task = new Task<int[,]>(worker);
+            _index = index;
             Socket = socket;
-            CurStatus = Status.pendingArrSize;
+            CurStatus = Status.connectionEstablished;
         }
-
-        public void StartCalculation()
-        {
-            if (CurStatus != Status.waitingForCalculatedAnswer)
-            {
-                throw new Exception("Cant start calculation without data");
-            }
-            _task.Start();
-        }
-
-        private int[,] worker()
-        {
-            int rA = _arr.GetLength(0);
-            int cA = _arr.GetLength(1);
-            int cB = 1;
-            int temp = 0;
-            int[,] toReturn = new int[rA, cB];
-
-            for (int i = 0; i < rA; i++)
-            {
-                for (int j = 0; j < cB; j++)
-                {
-                    temp = 0;
-                    for (int k = 0; k < cA; k++)
-                    {
-                        temp += _arr[i, k] * _vecor[k];
-                    }
-                    toReturn[i, j] = temp;
-                }
-            }
-
-
-            Thread.Sleep(10_000); //simulate work
-            return toReturn;
-        }
-
     }
-    public enum Status { pendingArrSize, pendingArrData, waitingForCalculatedAnswer };
+    public enum Status { connectionEstablished, pendingCommand, waitingResult };
+    public enum Command { Save, Load, AddDoc, GetByWord, GetByQuery, Unknown};
 }

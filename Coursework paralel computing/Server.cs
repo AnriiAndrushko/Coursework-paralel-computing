@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using InvertedIndexLib;
 
 namespace IndexServer
 {
@@ -12,8 +13,9 @@ namespace IndexServer
         private readonly string _adress;
         private readonly int _port;
         private readonly Socket _serverSocket;
+        private readonly InvertedIndexKeeper _index;
 
-        public Server(string adress, int port, int backlogCount = 3)
+        public Server(string adress, int port, InvertedIndexKeeper _index, int backlogCount = 3)
         {
             _backlogCount = backlogCount;
             _clients = new ConcurrentDictionary<Client, Client>();
@@ -30,7 +32,7 @@ namespace IndexServer
         {
             Socket socket;
             socket = _serverSocket.EndAccept(AR);
-            var client = new Client(socket);
+            var client = new Client(socket, _index);
             do { } while (!_clients.TryAdd(client, client));
             socket.BeginReceive(client.Buff, 0, client.BufferSize, SocketFlags.None, ReceiveCallback, client);
             Console.WriteLine("Client connected");
@@ -40,11 +42,11 @@ namespace IndexServer
         private void ReceiveCallback(IAsyncResult AR)
         {
             Client curClient = (Client)AR.AsyncState;
-            int received;
+            int amountReceivedBytes;
 
             try
             {
-                received = curClient.Socket.EndReceive(AR);
+                amountReceivedBytes = curClient.Socket.EndReceive(AR);
             }
             catch (SocketException)
             {
@@ -53,7 +55,7 @@ namespace IndexServer
                 do { } while (_clients.TryRemove(curClient, out curClient));
                 return;
             }
-            if (received == 1)
+            if (amountReceivedBytes == 1)
             {
                 curClient.Socket.Shutdown(SocketShutdown.Both);
                 curClient.Socket.Close();
@@ -61,41 +63,31 @@ namespace IndexServer
                 Console.WriteLine("Client disconnected");
                 return;
             }
-
-
-            byte[] recBuf = new byte[received];
-            Array.Copy(curClient.Buff, recBuf, received);
+            byte[] recBuf = new byte[amountReceivedBytes];
+            Array.Copy(curClient.Buff, recBuf, amountReceivedBytes);
             byte[] toSend;
             switch (curClient.CurStatus)
             {
-                case Status.pendingArrSize:
-                    curClient.CurStatus = Status.pendingArrData;
-
-                    Console.WriteLine($"Recieved {curClient.n} array size");
-                    toSend = Encoding.ASCII.GetBytes($"Recieved length of array: {curClient.n}, enter data of this array");
-                    curClient.Socket.Send(toSend);
-                    break;
-                case Status.pendingArrData:
-                    curClient.CurStatus = Status.waitingForCalculatedAnswer;
+                case Status.pendingCommand:
+                    curClient.CurStatus = Status.waitingResult;
                     Console.WriteLine("Starting calculation");
-                    curClient.StartCalculation();
-                    toSend = Encoding.ASCII.GetBytes("Starting calculation");
+                    toSend = Encoding.ASCII.GetBytes("Started your command");
                     curClient.Socket.Send(toSend);
                     break;
-                case Status.waitingForCalculatedAnswer:
+                case Status.waitingResult:
                     Console.WriteLine("Attemp to get result");
                     var res = curClient.Result;
-                    if (res.Length == 0)
+                    if (res == null)
                     {
-                        toSend = Encoding.ASCII.GetBytes("Still bisy");
+                        toSend = Encoding.ASCII.GetBytes("No result for this command");
                     }
                     else{
                         StringBuilder sb = new();
-                        for (int i =0; i<res.Length; i++)
+                        foreach(var path in res)
                         {
-                            sb.Append(res[i, 0]).Append(' ');
+                            sb.Append(path).Append(' ');
                         }
-                        toSend = Encoding.ASCII.GetBytes($"Your result is: {sb}");
+                        toSend = Encoding.ASCII.GetBytes($"Your result is:\n {sb}");
                     }
                     
                     curClient.Socket.Send(toSend);
