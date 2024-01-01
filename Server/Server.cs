@@ -14,7 +14,7 @@ namespace IndexServer
         private readonly int _port;
         private readonly Socket _serverSocket;
         private readonly InvertedIndexKeeper _index;
-
+        public bool IsBusy => _index.IsBusy;
         public Server(string adress, int port, int backlogCount = 6, int threadCount = 6)
         {
             _index = new InvertedIndexKeeper(threadCount);
@@ -36,7 +36,7 @@ namespace IndexServer
             {
                 socket = _serverSocket.EndAccept(AR);
             }
-            catch(ObjectDisposedException)
+            catch (ObjectDisposedException)
             {
                 return;
             }
@@ -121,5 +121,44 @@ namespace IndexServer
             Console.WriteLine("Server started");
         }
 
+        public string LocalExecute(string command)
+        {
+            string cmd = command.Split()[0];
+            string param;
+            IEnumerable<string> res;
+            Command parsedCommand;
+            if (!Enum.TryParse(cmd, true, out parsedCommand))
+            {
+                parsedCommand = Command.Unknown;
+            };
+            switch (parsedCommand)
+            {
+                case Command.Save:
+                    param = command.Split(' ', 2)[1];
+                    _index.Save(param);
+                    return cmd + " command was recieved";
+                case Command.Load:
+                    param = command.Split(' ', 2)[1];
+                    _index.Load(param);
+                    return cmd + " command was recieved";
+                case Command.AddDoc:
+                    param = command.Split(' ', 2)[1];
+                    _index.AddDoc(param);
+                    return cmd + " command was recieved";
+                case Command.GetByWord:
+                    param = command.Split(' ', 2)[1];
+                    res = _index.GetByWord(param);
+                    break;
+                case Command.GetByQuery:
+                    param = command.Split(' ', 2)[1];
+                    res = _index.GetByQuery(param);
+                    break;
+                default:
+                    return "Incorrect command was recieved";
+
+            }
+            return res.Aggregate(new StringBuilder(), (sb, x) => sb.Append(x).Append(" ")).ToString();
+        }
     }
+
 }
