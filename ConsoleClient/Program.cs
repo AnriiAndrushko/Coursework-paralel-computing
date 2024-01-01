@@ -91,16 +91,16 @@ void SendRequest()
         case Command.GetByQuery:
             break;
         case Command.Disconnect:
-            SendCommand(command);
+            SendCommand(input);
             Exit();
             return;
         default:
             Console.WriteLine("Incorrect command");
-            SendCommand(command);//this should not be here in real app, but i need to send incorrect command to test that server correctly handle it
+            SendCommand(input);//this should not be here in real app, but i need to send incorrect command to test that server correctly handle it
             return;
     }
 
-    SendCommand(command);
+    SendCommand(input);
 }
 
 

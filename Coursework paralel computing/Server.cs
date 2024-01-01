@@ -15,8 +15,9 @@ namespace IndexServer
         private readonly Socket _serverSocket;
         private readonly InvertedIndexKeeper _index;
 
-        public Server(string adress, int port, InvertedIndexKeeper _index, int backlogCount = 3)
+        public Server(string adress, int port, InvertedIndexKeeper index, int backlogCount = 3)
         {
+            _index = index;
             _backlogCount = backlogCount;
             _clients = new ConcurrentDictionary<Client, Client>();
             _adress = adress;
