@@ -8,6 +8,7 @@ namespace InvertedIndexLib
         ConcurrentQueue<Task> _queue;
         InvertedIndex _index;
         public bool IsBusy => _pool.IsBusy;
+        public event NotifyCompleted TasksCompleted;
 
         public InvertedIndexKeeper(int threadCount)
         {
@@ -15,6 +16,11 @@ namespace InvertedIndexLib
             _pool = new MyThreadPool(_queue, threadCount);
             _index = new InvertedIndex();
             _pool.Start();
+            _pool.TasksCompleted += OnTasksCompleted;
+        }
+        private void OnTasksCompleted()
+        {
+            TasksCompleted?.Invoke();
         }
 
         public void Save(string path)

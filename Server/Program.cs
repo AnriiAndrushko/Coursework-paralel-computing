@@ -24,25 +24,36 @@ List<string> path = new List<string>() { "F:\\dataset\\aclImdb\\test\\neg",
                                          "F:\\dataset\\aclImdb\\train\\unsup", 
                                          "F:\\dataset\\aclImdb\\train\\pos", 
                                          "F:\\dataset\\aclImdb\\train\\neg" };
+List<string> files = new List<string>();
 
+foreach (string pathItem in path)
+{
+    foreach (var file in Directory.GetFiles(pathItem))
+    {
+        files.Add(file);
+    }
+}
+
+ManualResetEvent isDoneMarker = new ManualResetEvent(false);
 for (int threadCount = 1; threadCount<25; threadCount++)
 {
     Console.Write("Thread count: " + threadCount);
 
     var server = new Server(IP, PORT, 0, threadCount);
 
+    isDoneMarker.Reset();
+
+    server.TasksCompleted += done;
+
     Stopwatch stopwatch = new Stopwatch();
     stopwatch.Start();
 
-
-    foreach (string pathItem in path)
+    foreach (var file in files)
     {
-        foreach (var file in Directory.GetFiles(pathItem))
-        {
-            server.LocalExecute("AddDoc "+file);
-        }
+        server.LocalExecute("AddDoc " + file);
     }
-    while (server.IsBusy){}
+
+    isDoneMarker.WaitOne();
 
     stopwatch.Stop();
     TimeSpan elapsedTime = stopwatch.Elapsed;
@@ -51,5 +62,10 @@ for (int threadCount = 1; threadCount<25; threadCount++)
 
     //server.LocalExecute("Save taskIndex");
     server.Stop();
+    server.TasksCompleted -= done;
 }
 Console.ReadLine();
+
+void done(){
+    isDoneMarker.Set();
+}

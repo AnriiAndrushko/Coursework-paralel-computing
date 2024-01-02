@@ -14,7 +14,12 @@ namespace IndexServer
         private readonly int _port;
         private readonly Socket _serverSocket;
         private readonly InvertedIndexKeeper _index;
+        public event NotifyCompleted TasksCompleted;
         public bool IsBusy => _index.IsBusy;
+        private void OnTasksCompleted()
+        {
+            TasksCompleted?.Invoke();
+        }
         public Server(string adress, int port, int backlogCount = 6, int threadCount = 6)
         {
             _index = new InvertedIndexKeeper(threadCount);
@@ -27,6 +32,7 @@ namespace IndexServer
             _serverSocket.Bind(ep);
             _serverSocket.Listen(_backlogCount);
             Console.WriteLine("Server setup complete");
+            _index.TasksCompleted += OnTasksCompleted;
         }
 
         private void AcceptCallback(IAsyncResult AR)

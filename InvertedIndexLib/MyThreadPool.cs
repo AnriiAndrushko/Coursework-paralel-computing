@@ -2,6 +2,7 @@
 
 namespace InvertedIndexLib
 {
+    public delegate void NotifyCompleted();
     internal class MyThreadPool
     {
         Thread[] _pool;
@@ -12,6 +13,7 @@ namespace InvertedIndexLib
         private readonly int _size;
         public bool IsBusy { get { lock (_busyCounterLock) { return _busyCounter != 0; } } }
         public int Size => _size;
+        public event NotifyCompleted TasksCompleted;
 
         public MyThreadPool(ConcurrentQueue<Task> taskQueue, int size = 6)
         {
@@ -60,6 +62,7 @@ namespace InvertedIndexLib
                         lock (_busyCounterLock)
                         {
                             _busyCounter--;
+                            TasksCompleted?.Invoke();
                         }
                     }
                 }
