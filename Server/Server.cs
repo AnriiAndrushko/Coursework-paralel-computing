@@ -85,11 +85,11 @@ namespace IndexServer
                         StringBuilder sb = new();
                         foreach (var path in res)
                         {
-                            sb.Append(path).Append(' ');
+                            sb.AppendLine(path);
                         }
                         if (res.Count() == 0)
                         {
-                            sb.Append("Nothing found");
+                            sb.AppendLine("Nothing found");
                         }
                         toSend = Encoding.ASCII.GetBytes(sb.ToString());
 

@@ -35,7 +35,7 @@ foreach (string pathItem in path)
 }
 
 ManualResetEvent isDoneMarker = new ManualResetEvent(false);
-for (int threadCount = 1; threadCount<25; threadCount++)
+for (int threadCount = 1; threadCount<5; threadCount++)
 {
     Console.Write("Thread count: " + threadCount);
 
@@ -58,12 +58,12 @@ for (int threadCount = 1; threadCount<25; threadCount++)
     stopwatch.Stop();
     TimeSpan elapsedTime = stopwatch.Elapsed;
     Console.WriteLine($" Time: {elapsedTime.TotalMilliseconds} milliseconds");
-
-
-    //server.LocalExecute("Save taskIndex");
+    if (threadCount == 4) { server.LocalExecute("Save taskIndex"); }
     server.Stop();
     server.TasksCompleted -= done;
 }
+
+
 Console.ReadLine();
 
 void done(){

@@ -127,6 +127,6 @@ void ReceiveResponse()
     var data = new byte[received];
     Array.Copy(buffer, data, received);
     string text = Encoding.ASCII.GetString(data);
-    Console.WriteLine("Message from server: "+text);
+    Console.WriteLine("Message from server:\n"+text);
 }
 public enum Command { Save, Load, AddDoc, GetByWord, GetByQuery, Disconnect, Unknown };
