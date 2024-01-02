@@ -124,9 +124,32 @@ void ReceiveResponse()
         return;
     }
     if (received == 0) return;
+
     var data = new byte[received];
     Array.Copy(buffer, data, received);
-    string text = Encoding.ASCII.GetString(data);
-    Console.WriteLine("Message from server:\n"+text);
+    StringBuilder text = new();
+
+    text.Append(Encoding.ASCII.GetString(data));
+
+    while (received == 4096)
+    {
+        received = 0;
+        try
+        {
+            received = ClientSocket.Receive(buffer, SocketFlags.None);
+        }
+        catch (SocketException)
+        {
+            Console.WriteLine("Server unexpectedly closed");
+            Exit();
+            return;
+        }
+        if (received == 0) break;
+
+        data = new byte[received];
+        Array.Copy(buffer, data, received);
+        text.Append(Encoding.ASCII.GetString(data));
+    }
+    Console.WriteLine("Message from server:\n" + text.ToString());
 }
 public enum Command { Save, Load, AddDoc, GetByWord, GetByQuery, Disconnect, Unknown };
