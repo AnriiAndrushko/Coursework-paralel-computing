@@ -19,11 +19,11 @@ if (!answer)
     server.Stop();
     return;
 }
-List<string> path = new List<string>() { "F:\\dataset\\aclImdb\\test\\neg", 
-                                         "F:\\dataset\\aclImdb\\test\\pos",
-                                         "F:\\dataset\\aclImdb\\train\\unsup", 
-                                         "F:\\dataset\\aclImdb\\train\\pos", 
-                                         "F:\\dataset\\aclImdb\\train\\neg" };
+List<string> path = new List<string>() { "F:\\dataset\\aclImdb\\my\\test\\neg", 
+                                         "F:\\dataset\\aclImdb\\my\\test\\pos",
+                                         "F:\\dataset\\aclImdb\\my\\train\\unsup", 
+                                         "F:\\dataset\\aclImdb\\my\\train\\pos", 
+                                         "F:\\dataset\\aclImdb\\my\\train\\neg" };
 List<string> files = new List<string>();
 
 foreach (string pathItem in path)
@@ -35,32 +35,46 @@ foreach (string pathItem in path)
 }
 
 ManualResetEvent isDoneMarker = new ManualResetEvent(false);
-for (int threadCount = 1; threadCount<5; threadCount++)
+int maxThread = 30;
+int aproxCount = 20;
+
+double[] time = new double[maxThread];
+
+for (int i = 0; i< aproxCount; i++)
 {
-    Console.Write("Thread count: " + threadCount);
-
-    var server = new Server(IP, PORT, 0, threadCount);
-
-    isDoneMarker.Reset();
-
-    server.TasksCompleted += done;
-
-    Stopwatch stopwatch = new Stopwatch();
-    stopwatch.Start();
-
-    foreach (var file in files)
+    for (int threadCount = 1; threadCount <= maxThread; threadCount++)
     {
-        server.LocalExecute("AddDoc " + file);
+        Console.Write("Thread count: " + threadCount);
+
+        var server = new Server(IP, PORT, 0, threadCount);
+
+        isDoneMarker.Reset();
+
+        server.TasksCompleted += done;
+
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        foreach (var file in files)
+        {
+            server.LocalExecute("AddDoc " + file);
+        }
+
+        isDoneMarker.WaitOne();
+
+        stopwatch.Stop();
+        TimeSpan elapsedTime = stopwatch.Elapsed;
+        Console.WriteLine($" Time: {elapsedTime.TotalMilliseconds} milliseconds");
+        time[threadCount-1] += elapsedTime.TotalMilliseconds;
+        //if (threadCount == maxThread) { server.LocalExecute("Save taskIndex"); }
+        server.Stop();
+        server.TasksCompleted -= done;
     }
-
-    isDoneMarker.WaitOne();
-
-    stopwatch.Stop();
-    TimeSpan elapsedTime = stopwatch.Elapsed;
-    Console.WriteLine($" Time: {elapsedTime.TotalMilliseconds} milliseconds");
-    if (threadCount == 4) { server.LocalExecute("Save taskIndex"); }
-    server.Stop();
-    server.TasksCompleted -= done;
+}
+for (int i = 0; i<maxThread; i++)
+{
+    time[i] /= aproxCount;
+    Console.Write($"{time[i].ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}, ");
 }
 
 

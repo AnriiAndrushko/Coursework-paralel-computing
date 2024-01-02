@@ -31,7 +31,7 @@ namespace IndexServer
             var ep = new IPEndPoint(IPAddress.Parse(_adress), _port);
             _serverSocket.Bind(ep);
             _serverSocket.Listen(_backlogCount);
-            Console.WriteLine("Server setup complete");
+            //Console.WriteLine("Server setup complete");
             _index.TasksCompleted += OnTasksCompleted;
         }
 
@@ -125,7 +125,7 @@ namespace IndexServer
                 client.Value.Socket.Close();
             }
             _serverSocket.Close();
-            Console.WriteLine("Server closed");
+            //Console.WriteLine("Server closed");
             _index.Dispose();
         }
 

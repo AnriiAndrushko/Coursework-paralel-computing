@@ -2,8 +2,6 @@
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using System.Security.Cryptography.X509Certificates;
-using static System.Net.Mime.MediaTypeNames;
 
 [assembly: InternalsVisibleTo("Tests")]
 

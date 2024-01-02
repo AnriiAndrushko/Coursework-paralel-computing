@@ -62,7 +62,7 @@ namespace InvertedIndexLib
                         lock (_busyCounterLock)
                         {
                             _busyCounter--;
-                            if (_busyCounter==0&& _taskQueue.Count==0)
+                            if (_busyCounter==0 && _taskQueue.Count==0)
                             {
                                 TasksCompleted?.Invoke();
                             }
