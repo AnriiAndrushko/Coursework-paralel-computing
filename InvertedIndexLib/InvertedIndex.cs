@@ -97,7 +97,7 @@ namespace InvertedIndexLib
             IEnumerable<string> tmp = files[0];
             foreach (var res in files)
             {
-                tmp = tmp.Intersect(res);
+                tmp = tmp.Intersect(res, StringComparer.Ordinal);
             }
             return tmp;
         }

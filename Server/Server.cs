@@ -94,8 +94,16 @@ namespace IndexServer
                         toSend = Encoding.ASCII.GetBytes(sb.ToString());
 
                     }
-
-                    curClient.Socket.Send(toSend);
+                    try
+                    {
+                        curClient.Socket.Send(toSend);
+                    }
+                    catch (SocketException)
+                    {
+                        Console.WriteLine("Client forcefully disconnected");
+                        return;
+                    }
+                    
                     if (curClient.CurStatus == Status.Disconnect)
                     {
                         curClient.Socket.Shutdown(SocketShutdown.Both);
