@@ -2,6 +2,8 @@
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography.X509Certificates;
+using static System.Net.Mime.MediaTypeNames;
 
 [assembly: InternalsVisibleTo("Tests")]
 
@@ -39,7 +41,7 @@ namespace InvertedIndexLib
         public void AddText(string text, string textOrigin)
         {
             string pattern = @"[\p{P}-[']]+";
-            text = Regex.Replace(text.ToLower(), pattern, " ");
+            text = Regex.Replace(text.ToLower(), pattern, "");
             text.Trim();
             foreach (string word in text.Split())
             {
@@ -70,6 +72,10 @@ namespace InvertedIndexLib
         }
         public IEnumerable<string> GetByWord(string word)
         {
+            string pattern = @"[\p{P}-[']]+";
+            word = Regex.Replace(word.ToLower(), pattern, "");
+            word.Trim();
+
             HashSet<string> result;
             if(_data.TryGetValue(word, out result))
             {

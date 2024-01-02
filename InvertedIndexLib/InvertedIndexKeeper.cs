@@ -32,6 +32,7 @@ namespace InvertedIndexLib
 
         public void Load(string path)
         {
+            if (!File.Exists(path)) { return; }
             _pool.Stop();
             _index = InvertedIndex.LoadIndex(path);
             _pool.Start();
