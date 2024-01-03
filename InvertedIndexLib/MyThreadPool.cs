@@ -5,11 +5,11 @@ namespace InvertedIndexLib
     public delegate void NotifyCompleted();
     internal class MyThreadPool
     {
-        Thread[] _pool;
-        ConcurrentQueue<Task> _taskQueue;
-        CancellationTokenSource _cts;
-        int _busyCounter;
-        object _busyCounterLock;
+        private Thread[] _pool;
+        private ConcurrentQueue<Task> _taskQueue;
+        private CancellationTokenSource _cts;
+        private int _busyCounter;
+        private object _busyCounterLock;
         private readonly int _size;
         public bool IsBusy { get { lock (_busyCounterLock) { return _busyCounter != 0; } } }
         public int Size => _size;

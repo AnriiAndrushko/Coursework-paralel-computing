@@ -4,9 +4,9 @@ namespace InvertedIndexLib
 {
     public class InvertedIndexKeeper:IDisposable
     {
-        MyThreadPool _pool;
-        ConcurrentQueue<Task> _queue;
-        InvertedIndex _index;
+        private MyThreadPool _pool;
+        private ConcurrentQueue<Task> _queue;
+        private InvertedIndex _index;
         public bool IsBusy => _pool.IsBusy;
         public event NotifyCompleted TasksCompleted;
 

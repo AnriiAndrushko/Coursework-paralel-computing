@@ -9,6 +9,7 @@ namespace IndexServer
         private string _received;
         private byte[] _buffer;
         private InvertedIndexKeeper _index;
+        private Status _curStatus;
         public int RecievedCount;
 
         public Socket Socket { get; set; }
@@ -81,7 +82,6 @@ namespace IndexServer
                 }
             }
         }
-        public Status _curStatus;
 
         public byte[] Buff {
             get
