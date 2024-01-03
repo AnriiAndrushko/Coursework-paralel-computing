@@ -6,9 +6,9 @@ namespace IndexServer
 {
     internal class Client
     {
-        string _received;
+        private string _received;
         private byte[] _buffer;
-        InvertedIndexKeeper _index;
+        private InvertedIndexKeeper _index;
         public int RecievedCount;
 
         public Socket Socket { get; set; }
