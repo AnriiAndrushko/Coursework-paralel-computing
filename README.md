@@ -9,8 +9,8 @@
 ## Getting Started
 
 ### Prerequisites
-- Visual Studio 2015 or later
-- .NET Framework 4.6 or later
+- Visual Studio 2022 or later
+- .NET 6.0 SDK
 
 ### Build and Run
 1. Open the solution in Visual Studio.
