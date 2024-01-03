@@ -19,6 +19,6 @@
 
 ## Usage
 
--Run Server project
--Select run mode "server"
--Run client
+1. Run Server project
+2. Select run mode "server"
+3. Run client

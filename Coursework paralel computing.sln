@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleClient", "ConsoleCli
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{18CE8D55-8E3B-4A22-AAD5-0EBAA42D21D8}"
 	ProjectSection(SolutionItems) = preProject
-		README.txt = README.txt
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
