@@ -1,15 +1,16 @@
-﻿using System.Collections.Concurrent;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using InvertedIndexLib;
+using Coursework_paralel_computing.TechClasses;
+using System.Diagnostics;
 
 namespace IndexServer
 {
     internal class Server
     {
         private int _backlogCount;
-        private readonly ConcurrentDictionary<Client, Client> _clients;
+        private readonly IMyConcurrentDictionary<Client, Client> _clients;
         private readonly string _adress;
         private readonly int _port;
         private readonly Socket _serverSocket;
@@ -20,11 +21,13 @@ namespace IndexServer
         {
             TasksCompleted?.Invoke();
         }
-        public Server(string adress, int port, int backlogCount = 6, int threadCount = 6)
+        public Server(string adress, int port, int backlogCount = 6, int threadCount = 6, bool useOwnDictionary = false)
         {
             _index = new InvertedIndexKeeper(threadCount);
             _backlogCount = backlogCount;
-            _clients = new ConcurrentDictionary<Client, Client>();
+            _clients = useOwnDictionary?
+                new MyConcurrentDictionary<Client, Client>() : 
+                new ConcurentDictionaryWrapper<Client, Client>();
             _adress = adress;
             _port = port;
             _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

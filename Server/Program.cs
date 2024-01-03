@@ -6,6 +6,14 @@ const int PORT = 25565;
 
 Console.WriteLine("Run test or normal server? test\\server");
 bool answer = Console.ReadLine().Equals("test");
+bool useOwnDictionary = false;
+
+if (answer) {
+    Console.WriteLine("Use own dictionary? y/n");
+    useOwnDictionary = Console.ReadLine().Equals("y");
+}
+
+
 
 if (!answer)
 {
@@ -44,9 +52,9 @@ for (int i = 0; i< aproxCount; i++)
 {
     for (int threadCount = 1; threadCount <= maxThread; threadCount++)
     {
-        Console.Write("Thread count: " + threadCount);
+        Console.WriteLine("Thread count: " + threadCount);
 
-        var server = new Server(IP, PORT, 0, threadCount);
+        var server = new Server(IP, PORT, 0, threadCount, useOwnDictionary);
 
         isDoneMarker.Reset();
 
