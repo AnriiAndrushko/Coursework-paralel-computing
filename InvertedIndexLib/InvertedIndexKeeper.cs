@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Threading;
 
 namespace InvertedIndexLib
 {
@@ -6,14 +7,17 @@ namespace InvertedIndexLib
     {
         private MyThreadPool _pool;
         private ConcurrentQueue<Task> _queue;
+        private ManualResetEventSlim _taskAvailableEvent;
         private InvertedIndex _index;
         public bool IsBusy => _pool.IsBusy;
         public event NotifyCompleted TasksCompleted;
 
+
         public InvertedIndexKeeper(int threadCount)
         {
+            _taskAvailableEvent = new ManualResetEventSlim(false);
             _queue = new ConcurrentQueue<Task>();
-            _pool = new MyThreadPool(_queue, threadCount);
+            _pool = new MyThreadPool(_queue, _taskAvailableEvent, threadCount);
             _index = new InvertedIndex();
             _pool.Start();
             _pool.TasksCompleted += OnTasksCompleted;
@@ -41,16 +45,19 @@ namespace InvertedIndexLib
         public void AddDoc(string docPath)
         {
             _queue.Enqueue(new Task(() => _index.AddDoc(docPath)));
+            _taskAvailableEvent.Set();
         }
         public void AddText(string text, string textOrigin = "Debug")
         {
             _queue.Enqueue(new Task(() => _index.AddText(text, textOrigin)));
+            _taskAvailableEvent.Set();
         }
 
         public IEnumerable<string> GetByWord(string word)
         {
             var tmp = new Task<IEnumerable<string>>(() => _index.GetByWord(word));
             _queue.Enqueue(tmp);
+            _taskAvailableEvent.Set();
             return tmp.Result;
         }
 
@@ -58,6 +65,7 @@ namespace InvertedIndexLib
         {
             var tmp = new Task<IEnumerable<string>>(() => _index.GetByQuery(query));
             _queue.Enqueue(tmp);
+            _taskAvailableEvent.Set();
             return tmp.Result;
         }
 

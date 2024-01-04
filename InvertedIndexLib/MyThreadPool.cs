@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Threading;
 
 namespace InvertedIndexLib
 {
@@ -7,6 +8,7 @@ namespace InvertedIndexLib
     {
         private Thread[] _pool;
         private ConcurrentQueue<Task> _taskQueue;
+        static ManualResetEventSlim _taskAvailableEvent;
         private CancellationTokenSource _cts;
         private int _busyCounter;
         private object _busyCounterLock;
@@ -15,13 +17,14 @@ namespace InvertedIndexLib
         public int Size => _size;
         public event NotifyCompleted TasksCompleted;
 
-        public MyThreadPool(ConcurrentQueue<Task> taskQueue, int size = 6)
+        public MyThreadPool(ConcurrentQueue<Task> taskQueue, ManualResetEventSlim taskAvailableEvent, int size = 6)
         {
             _busyCounterLock = new object();
             _busyCounter = 0;
             _size = size;
             _taskQueue = taskQueue;
             _pool = new Thread[size];
+            _taskAvailableEvent = taskAvailableEvent;
         }
 
         public void Start()
@@ -50,24 +53,29 @@ namespace InvertedIndexLib
             Task curTask;
             while (!_cts.Token.IsCancellationRequested)
             {
-                if (!_taskQueue.IsEmpty)//TODO: maybe use semafor here
+                try { _taskAvailableEvent.Wait(_cts.Token); }
+                catch { return; }
+                
+                if (_taskQueue.TryDequeue(out curTask))
                 {
-                    if (_taskQueue.TryDequeue(out curTask))
+                    lock (_busyCounterLock)
                     {
-                        lock (_busyCounterLock)
+                        _busyCounter++;
+                    }
+                    curTask.RunSynchronously();
+                    lock (_busyCounterLock)
+                    {
+                        _busyCounter--;
+                        if (_busyCounter == 0 && _taskQueue.Count == 0)
                         {
-                            _busyCounter++;
-                        }
-                        curTask.RunSynchronously();
-                        lock (_busyCounterLock)
-                        {
-                            _busyCounter--;
-                            if (_busyCounter==0 && _taskQueue.Count==0)
-                            {
-                                TasksCompleted?.Invoke();
-                            }
+                            TasksCompleted?.Invoke();
                         }
                     }
+                    
+                }
+                else
+                {
+                    _taskAvailableEvent.Reset();
                 }
             }
         }

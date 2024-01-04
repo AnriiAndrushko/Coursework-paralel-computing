@@ -87,7 +87,7 @@ void SendRequest()
             return;
         default:
             Console.WriteLine("Incorrect command");
-            SendCommand(input);//this should not be here in real app, but i need to send incorrect command to test that server correctly handle it
+            SendCommand("blah blah");//this should not be here in real app, but i need to send incorrect command to test that server correctly handle it
             return;
     }
 
@@ -99,7 +99,6 @@ void SendCommand(string data)
 {
     byte[] buffer = Encoding.ASCII.GetBytes(data);
     try {
-
         ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
     }
     catch (SocketException) {

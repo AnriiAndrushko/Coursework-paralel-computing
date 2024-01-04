@@ -74,7 +74,7 @@ for (int i = 0; i< aproxCount; i++)
         TimeSpan elapsedTime = stopwatch.Elapsed;
         Console.WriteLine($" Time: {elapsedTime.TotalMilliseconds} milliseconds");
         time[threadCount-1] += elapsedTime.TotalMilliseconds;
-        //if (threadCount == maxThread) { server.LocalExecute("Save taskIndex"); }
+        //server.LocalExecute("Save taskIndex");
         server.Stop();
         server.TasksCompleted -= done;
     }
