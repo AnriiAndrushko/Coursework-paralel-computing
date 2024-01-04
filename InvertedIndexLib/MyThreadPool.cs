@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using InvertedIndexLib.TechClasses;
+using System.Collections.Concurrent;
 
 namespace InvertedIndexLib
 {
@@ -6,17 +7,16 @@ namespace InvertedIndexLib
     internal class MyThreadPool
     {
         private Thread[] _pool;
-        private ConcurrentQueue<Task> _taskQueue;
+        private IMyConcurrentQueue<Task> _taskQueue;
         static ManualResetEventSlim _taskAvailableEvent;
         private CancellationTokenSource _cts;
         private int _busyCounter;
         private object _busyCounterLock;
         private readonly int _size;
-        public bool IsBusy { get { lock (_busyCounterLock) { return _busyCounter != 0; } } }
         public int Size => _size;
         public event NotifyCompleted TasksCompleted;
 
-        public MyThreadPool(ConcurrentQueue<Task> taskQueue, ManualResetEventSlim taskAvailableEvent, int size = 6)
+        public MyThreadPool(IMyConcurrentQueue<Task> taskQueue, ManualResetEventSlim taskAvailableEvent, int size = 6)
         {
             _busyCounterLock = new object();
             _busyCounter = 0;

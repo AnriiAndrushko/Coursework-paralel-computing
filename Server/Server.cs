@@ -2,31 +2,28 @@
 using System.Net;
 using System.Text;
 using InvertedIndexLib;
-using Coursework_paralel_computing.TechClasses;
+using InvertedIndexLib.TechClasses;
 
 namespace IndexServer
 {
     internal class Server
     {
         private int _backlogCount;
-        private readonly IMyConcurrentDictionary<Client, Client> _clients;
+        private readonly HashSet<Client> _clients;
         private readonly string _adress;
         private readonly int _port;
         private readonly Socket _serverSocket;
         private readonly InvertedIndexKeeper _index;
         public event NotifyCompleted TasksCompleted;
-        public bool IsBusy => _index.IsBusy;
         private void OnTasksCompleted()
         {
             TasksCompleted?.Invoke();
         }
-        public Server(string adress, int port, int backlogCount = 6, int threadCount = 6, bool useOwnDictionary = false)
+        public Server(string adress, int port, int backlogCount = 6, int threadCount = 6, bool useOwnQueue = false)
         {
-            _index = new InvertedIndexKeeper(threadCount);
+            _index = new InvertedIndexKeeper(threadCount, useOwnQueue);
             _backlogCount = backlogCount;
-            _clients = useOwnDictionary?
-                new MyConcurrentDictionary<Client, Client>() : 
-                new ConcurentDictionaryWrapper<Client, Client>();
+            _clients = new HashSet<Client>();
             _adress = adress;
             _port = port;
             _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -49,7 +46,7 @@ namespace IndexServer
                 return;
             }
             var client = new Client(socket, _index);
-            do { } while (!_clients.TryAdd(client, client));
+            _clients.Add(client);
             socket.BeginReceive(client.Buff, 0, client.BufferSize, SocketFlags.None, ReceiveCallback, client);
             Console.WriteLine("Client connected");
             _serverSocket.BeginAccept(AcceptCallback, null);
@@ -67,7 +64,7 @@ namespace IndexServer
             {
                 Console.WriteLine("Client forcefully disconnected");
                 curClient.Socket.Close();
-                do { } while (_clients.TryRemove(curClient, out curClient));
+                _clients.Remove(curClient);
                 return;
             }
             curClient.RecievedCount = amountReceivedBytes;
@@ -110,7 +107,7 @@ namespace IndexServer
                     {
                         curClient.Socket.Shutdown(SocketShutdown.Both);
                         curClient.Socket.Close();
-                        do { } while (_clients.TryRemove(curClient, out curClient));
+                        _clients.Remove(curClient);
                         Console.WriteLine("Client disconnected");
                         return;
                     }
@@ -123,8 +120,8 @@ namespace IndexServer
         {
             foreach (var client in _clients)
             {
-                client.Value.Socket.Shutdown(SocketShutdown.Both);
-                client.Value.Socket.Close();
+                client.Socket.Shutdown(SocketShutdown.Both);
+                client.Socket.Close();
             }
             _serverSocket.Close();
             //Console.WriteLine("Server closed");

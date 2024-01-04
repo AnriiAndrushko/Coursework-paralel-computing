@@ -1,22 +1,21 @@
-﻿using System.Collections.Concurrent;
-using System.Threading;
+﻿using InvertedIndexLib.TechClasses;
+using System.Collections.Concurrent;
 
 namespace InvertedIndexLib
 {
     public class InvertedIndexKeeper:IDisposable
     {
         private MyThreadPool _pool;
-        private ConcurrentQueue<Task> _queue;
+        private IMyConcurrentQueue<Task> _queue;
         private ManualResetEventSlim _taskAvailableEvent;
         private InvertedIndex _index;
-        public bool IsBusy => _pool.IsBusy;
         public event NotifyCompleted TasksCompleted;
 
 
-        public InvertedIndexKeeper(int threadCount)
+        public InvertedIndexKeeper(int threadCount, bool useOwnQueue = false)
         {
             _taskAvailableEvent = new ManualResetEventSlim(false);
-            _queue = new ConcurrentQueue<Task>();
+            _queue = useOwnQueue? new MyConcurrentQueue<Task>():new ConcurrentQueueWrapper<Task>();
             _pool = new MyThreadPool(_queue, _taskAvailableEvent, threadCount);
             _index = new InvertedIndex();
             _pool.Start();

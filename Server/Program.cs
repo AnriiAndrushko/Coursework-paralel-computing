@@ -6,11 +6,11 @@ const int PORT = 25565;
 
 Console.WriteLine("Run test or normal server? test\\server");
 bool answer = Console.ReadLine().Equals("test");
-bool useOwnDictionary = false;
+bool useOwnQueue = false;
 
 if (answer) {
-    Console.WriteLine("Use own dictionary? y/n");
-    useOwnDictionary = Console.ReadLine().Equals("y");
+    Console.WriteLine("Use own queue? y/n");
+    useOwnQueue = Console.ReadLine().Equals("y");
 }
 
 
@@ -44,7 +44,7 @@ foreach (string pathItem in path)
 
 ManualResetEvent isDoneMarker = new ManualResetEvent(false);
 int maxThread = 30;
-int aproxCount = 20;
+int aproxCount = 10;
 
 double[] time = new double[maxThread];
 
@@ -54,7 +54,7 @@ for (int i = 0; i< aproxCount; i++)
     {
         Console.WriteLine("Thread count: " + threadCount);
 
-        var server = new Server(IP, PORT, 0, threadCount, useOwnDictionary);
+        var server = new Server(IP, PORT, 0, threadCount, useOwnQueue);
 
         isDoneMarker.Reset();
 

@@ -33,6 +33,8 @@
             index.AddText(content1, document1Id);
             index.AddText(content2, document2Id);
 
+            Thread.Sleep(100);
+
             CollectionAssert.Contains(index.GetByWord("document").ToList(), document1Id);
             CollectionAssert.Contains(index.GetByWord("document").ToList(), document2Id);
             Assert.AreEqual(1, index.GetByWord("sample").Count());
@@ -59,6 +61,8 @@
             index.AddText(content1, pathToDoc1);
             index.AddText(content2, pathToDoc2);
 
+            Thread.Sleep(100);
+
             CollectionAssert.Contains(index.GetByWord("document").ToList(), pathToDoc1);
             CollectionAssert.Contains(index.GetByWord("document").ToList(), pathToDoc2);
             Assert.AreEqual(1, index.GetByWord("sample").Count());
@@ -84,6 +88,8 @@
                 File.Delete(pathToDoc2);
             index.AddText(content1, pathToDoc1);
             index.AddText(content2, pathToDoc2);
+
+            Thread.Sleep(100);
 
             CollectionAssert.Contains(index.GetByQuery("is a sample").ToList(), pathToDoc1);
             Assert.AreEqual(1, index.GetByQuery("is a sample").Count());
